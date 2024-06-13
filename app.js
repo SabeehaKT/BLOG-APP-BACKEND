@@ -2,6 +2,7 @@ const express = require("express")
 const mongoose = require ("mongoose")
 const cors = require("cors")
 const bcryptjs = require ("bcryptjs") //for ciphertexting
+const jwt = require("jsonwebtoken")
 const {signupmodel} = require("./models/signup")
 
 const app = express()
@@ -38,7 +39,13 @@ app.post("/signin",(req,res)=>{
                 bcryptjs.compare(input.pass,dbPassword,(error,isMatch)=>{
 
                     if (isMatch) {
-                        res.json({"status":"success","userId":response[0]._id})
+                        jwt.sign({email:input.emailid},"blog-app",{expiresIn:"1d"},(error,token)=>{
+                            if (error) {
+                               res.json("unable to create a token") 
+                            } else {
+                                res.json({"status":"success","userId":response[0]._id,"token":token})
+                            }
+                        })
                     } else {
                         res.json({"status":"Incorrect"})
                     }
